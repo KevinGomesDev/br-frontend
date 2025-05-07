@@ -5,8 +5,8 @@ function Login() {
   const [senha, setSenha] = useState("");
 
   const verificarSessao = async () => {
-    const res = await fetch("http://localhost:3000/auth/me", {
-      credentials: "include", // ⭐ precisa do cookie
+    const res = await fetch(import.meta.env.VITE_API_URL, {
+      credentials: "include",
     });
 
     const data = await res.json();
@@ -22,7 +22,7 @@ function Login() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // ⭐ envia o cookie
+        credentials: "include",
         body: JSON.stringify({ email, password: senha }),
       });
 
