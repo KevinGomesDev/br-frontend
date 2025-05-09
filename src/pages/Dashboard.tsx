@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { useState } from "react";
+import MapGrid from "../components/MapGrid";
 import Feedback from "../components/Feedback";
 
 export default function Dashboard() {
@@ -37,6 +38,7 @@ export default function Dashboard() {
           onClose={() => setFeedback(null)}
         />
       )}
+
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
         <p className="text-gray-600">
@@ -52,6 +54,7 @@ export default function Dashboard() {
       </div>
 
       <p className="text-gray-600">Bem-vindo ao Battle Realm!</p>
+      <MapGrid rows={20} cols={59} />
     </div>
   );
 }
