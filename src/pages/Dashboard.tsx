@@ -11,6 +11,9 @@ export default function Dashboard() {
     message: string;
     type: "success" | "error";
   } | null>(null);
+  const [selectedTab, setSelectedTab] = useState<
+    "Reino" | "Mapa" | "Regente" | "Heróis" | "Tropas" | "Configurações"
+  >("Mapa");
 
   const handleLogout = async () => {
     try {
@@ -40,21 +43,56 @@ export default function Dashboard() {
       )}
 
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-600">
-          Bem-vindo, <strong>{user?.name}</strong>!
-        </p>
-
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-        >
-          Sair
-        </button>
+        <div className="flex flex-wrap w-full mb-6 border-b pb-2">
+          {[
+            "Reino",
+            "Mapa",
+            "Regente",
+            "Heróis",
+            "Tropas",
+            "Configurações",
+          ].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setSelectedTab(tab as typeof selectedTab)}
+              className={`px-4 py-2 rounded-t text-sm sm:text-base flex-1 text-center ${
+                selectedTab === tab
+                  ? "bg-white text-blue-600 font-semibold border border-b-0"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
+      {selectedTab === "Mapa" && <MapGrid rows={20} cols={59} />}
 
-      <p className="text-gray-600">Bem-vindo ao Battle Realm!</p>
-      <MapGrid rows={20} cols={59} />
+      {selectedTab === "Reino" && (
+        <p className="text-gray-600">Seção do Reino em construção.</p>
+      )}
+      {selectedTab === "Regente" && (
+        <p className="text-gray-600">Seção do Regente em construção.</p>
+      )}
+      {selectedTab === "Heróis" && (
+        <p className="text-gray-600">Seção dos Heróis em construção.</p>
+      )}
+      {selectedTab === "Tropas" && (
+        <p className="text-gray-600">Seção das Tropas em construção.</p>
+      )}
+      {selectedTab === "Configurações" && (
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Configurações da conta e preferências.
+          </p>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+          >
+            Sair
+          </button>
+        </div>
+      )}
     </div>
   );
 }
