@@ -1,19 +1,21 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import Feedback from "../components/Feedback";
 import { useUser } from "../contexts/UserContext";
+import Feedback from "../components/Feedback";
 
-function Login() {
+export default function Register() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setSenha] = useState("");
+  const [senha, setSenha] = useState("");
   const [feedback, setFeedback] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
 
   const navigate = useNavigate();
+
   const { user, loading } = useUser();
 
   useEffect(() => {
@@ -27,12 +29,12 @@ function Login() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
+        `${import.meta.env.VITE_API_URL}/auth/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ name, email, password: senha }),
         }
       );
 
@@ -40,24 +42,27 @@ function Login() {
 
       if (!response.ok) {
         setFeedback({
-          message: data.message || "Erro ao fazer login",
+          message: data.message || "Erro ao registrar",
           type: "error",
         });
         return;
       }
 
-      setFeedback({ message: "Login realizado com sucesso!", type: "success" });
+      setFeedback({
+        message: "Registro realizado com sucesso!",
+        type: "success",
+      });
       setTimeout(() => navigate("/dashboard"), 1000);
     } catch (error: any) {
       setFeedback({
-        message: error.message || "Erro inesperado ao tentar logar.",
+        message: error.message || "Erro inesperado ao tentar se registrar.",
         type: "error",
       });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
       {feedback && (
         <Feedback
           message={feedback.message}
@@ -69,59 +74,56 @@ function Login() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded shadow-md w-full max-w-sm"
       >
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">
-          Login
-        </h1>
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
+          Criar Conta
+        </h2>
 
-        <div className="mb-4">
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Email
-          </label>
+        <label className="block mb-2">
+          Nome
           <input
-            id="email"
+            className="mt-1 w-full px-3 py-2 border rounded"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </label>
+
+        <label className="block mb-2">
+          Email
+          <input
+            className="mt-1 w-full px-3 py-2 border rounded"
             type="email"
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-        </div>
+        </label>
 
-        <div className="mb-6">
-          <label
-            htmlFor="senha"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Senha
-          </label>
+        <label className="block mb-4">
+          Senha
           <input
-            id="senha"
+            className="mt-1 w-full px-3 py-2 border rounded"
             type="password"
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
-            value={password}
+            value={senha}
             onChange={(e) => setSenha(e.target.value)}
             required
           />
-        </div>
+        </label>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
         >
-          Entrar
+          Registrar
         </button>
         <p className="mt-4 text-sm text-center">
-          Não tem conta?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline">
-            Crie uma agora
+          Já tem conta?{" "}
+          <Link to="/" className="text-blue-600 hover:underline">
+            Entre agora
           </Link>
         </p>
       </form>
     </div>
   );
 }
-
-export default Login;
