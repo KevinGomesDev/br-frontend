@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { useState } from "react";
-import MapGrid from "../components/MapGrid";
+import MapGrid, { type TileType } from "../components/MapGrid";
 import Feedback from "../components/Feedback";
+import InfoCard from "../components/InfoCard";
+import ResourceBar, { type Resources } from "../components/ResourceBar";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -14,6 +16,19 @@ export default function Dashboard() {
   const [selectedTab, setSelectedTab] = useState<
     "Reino" | "Mapa" | "Regente" | "Heróis" | "Tropas" | "Configurações"
   >("Mapa");
+  const [selectedTile, setSelectedTile] = useState<{
+    x: number;
+    y: number;
+    type: TileType;
+  } | null>(null);
+  const [resources, setResources] = useState<Resources>({
+    minério: 0,
+    arcana: 0,
+    suprimento: 0,
+    experiência: 0,
+    devoção: 0,
+    fortaleza: 0,
+  });
 
   const handleLogout = async () => {
     try {
@@ -41,6 +56,7 @@ export default function Dashboard() {
           onClose={() => setFeedback(null)}
         />
       )}
+      <ResourceBar resources={resources} />
 
       <div className="flex justify-between items-center mb-4">
         <div className="flex flex-wrap w-full mb-6 border-b pb-2">
@@ -66,7 +82,20 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
-      {selectedTab === "Mapa" && <MapGrid rows={20} cols={59} />}
+      {selectedTab === "Mapa" && (
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <MapGrid
+              selectedTile={selectedTile}
+              setSelectedTile={setSelectedTile}
+            />
+          </div>
+          <InfoCard
+            selectedTile={selectedTile}
+            onClear={() => setSelectedTile(null)}
+          />
+        </div>
+      )}
 
       {selectedTab === "Reino" && (
         <p className="text-gray-600">Seção do Reino em construção.</p>

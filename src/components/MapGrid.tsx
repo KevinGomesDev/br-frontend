@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
-type TileType =
+export type TileType =
   | "grass"
   | "water"
   | "forest"
@@ -268,98 +268,198 @@ function generateContinentMap(
 }
 
 export default function MapGrid({
-  rows = 20,
-  cols = 20,
+  rows = 40,
+  cols = 40,
   landRatio = 0.3,
+  selectedTile,
+  setSelectedTile,
 }: {
   rows?: number;
   cols?: number;
   landRatio?: number;
+  selectedTile: { x: number; y: number; type: TileType } | null;
+  setSelectedTile: (
+    tile: { x: number; y: number; type: TileType } | null
+  ) => void;
 }) {
   const [map] = useState<TileType[][]>(() =>
     generateContinentMap(rows, cols, landRatio)
   );
+  const [tileSize, setTileSize] = useState(32);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const updateTileSize = () => {
+      const padding = 32; // margem segura para evitar overflow
+      const maxWidth = window.innerWidth - padding;
+      const maxHeight = window.innerHeight - padding;
+
+      const tileWidth = Math.floor(maxWidth / cols);
+      const tileHeight = Math.floor(maxHeight / rows);
+      const newTileSize = Math.min(tileWidth, tileHeight);
+
+      setTileSize(newTileSize);
+    };
+
+    updateTileSize();
+    window.addEventListener("resize", updateTileSize);
+    return () => window.removeEventListener("resize", updateTileSize);
+  }, [cols, rows]);
 
   const tileColors: Record<TileType, string> = {
-    grass: "border border-green-500 bg-green-600",
-    water: "border border-blue-500 bg-blue-600",
-    forest: "border border-emerald-800 bg-emerald-900",
-    snow: "border border-gray-100 bg-gray-200",
-    desert: "border border-yellow-400 bg-yellow-500",
-    frozen_water: "border border-cyan-100 bg-cyan-200",
+    grass: "border bg-green-600 border-green-500",
+    water: "border bg-blue-600 border-blue-500",
+    forest: "border bg-emerald-900 border-emerald-800",
+    snow: "border bg-gray-200 border-gray-100",
+    desert: "border bg-yellow-400 border-gray-100",
+    frozen_water: "border bg-cyan-200 border-cyan-100",
   };
 
-  const [selectedTile, setSelectedTile] = useState<{
-    x: number;
-    y: number;
-    type: TileType;
-  } | null>(null);
+  // Camera
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef<{ x: number; y: number } | null>(null);
+
+  function handleZoom(e: React.WheelEvent) {
+    e.preventDefault();
+    const delta = e.deltaY * -0.001;
+    const nextZoom = Math.min(4, Math.max(0.5, zoom + delta));
+    setZoom(nextZoom);
+  }
+
+  function handleMouseDown(e: React.MouseEvent) {
+    setIsDragging(true);
+    dragStart.current = { x: e.clientX, y: e.clientY };
+  }
+
+  function handleMouseMove(e: React.MouseEvent) {
+    if (!isDragging || !dragStart.current) return;
+    const dx = e.clientX - dragStart.current.x;
+    const dy = e.clientY - dragStart.current.y;
+    setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+    dragStart.current = { x: e.clientX, y: e.clientY };
+  }
+
+  function handleMouseUp() {
+    setIsDragging(false);
+    dragStart.current = null;
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      dragStart.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    }
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (!isDragging || e.touches.length !== 1 || !dragStart.current) return;
+    const dx = e.touches[0].clientX - dragStart.current.x;
+    const dy = e.touches[0].clientY - dragStart.current.y;
+    setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+    dragStart.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+  }
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const delta = e.deltaY * -0.001;
+        setZoom((prev) => Math.min(4, Math.max(0.5, prev + delta)));
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => container.removeEventListener("wheel", handleWheel);
+  }, []);
+
+  // Fim - Camera
 
   return (
-    <div className="mt-6">
+    <div
+      ref={containerRef}
+      className="bg-white rounded shadow-md w-full h-[calc(100vh-14rem)] overflow-hidden relative touch-none"
+      onWheel={handleZoom}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={() => setIsDragging(false)}
+    >
+      {/* Wrapper que aplica o zoom e offset */}
+
       <div
-        className="grid"
-        style={{ gridTemplateColumns: `repeat(${cols}, 2rem)` }}
+        style={{
+          transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+          transformOrigin: "top left",
+          width: `${cols * tileSize}px`,
+          height: `${rows * tileSize}px`,
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
       >
-        {map.map((row, y) =>
-          row.map((tile, x) => {
-            let borderClasses = "";
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: `repeat(${cols}, ${tileSize}px)`,
+          }}
+        >
+          {map.map((row, y) =>
+            row.map((tile, x) => {
+              let borderClasses = "";
 
-            if (tile === "water") {
-              const getTile = (yy: number, xx: number) =>
-                yy >= 0 && yy < rows && xx >= 0 && xx < cols
-                  ? map[yy][xx]
-                  : "water";
+              if (tile === "water") {
+                const getTile = (yy: number, xx: number) =>
+                  yy >= 0 && yy < rows && xx >= 0 && xx < cols
+                    ? map[yy][xx]
+                    : "water";
 
-              if (getTile(y - 1, x) !== "water")
-                borderClasses += " border-t border-blue-800";
-              if (getTile(y + 1, x) !== "water")
-                borderClasses += " border-b border-blue-800";
-              if (getTile(y, x - 1) !== "water")
-                borderClasses += " border-l border-blue-800";
-              if (getTile(y, x + 1) !== "water")
-                borderClasses += " border-r border-blue-800";
-            }
+                if (getTile(y - 1, x) !== "water")
+                  borderClasses += " border-t border-blue-800";
+                if (getTile(y + 1, x) !== "water")
+                  borderClasses += " border-b border-blue-800";
+                if (getTile(y, x - 1) !== "water")
+                  borderClasses += " border-l border-blue-800";
+                if (getTile(y, x + 1) !== "water")
+                  borderClasses += " border-r border-blue-800";
+              }
 
-            return (
-              <div
-                onClick={() => {
-                  setSelectedTile({ x, y, type: tile });
-                }}
-                key={`${y}-${x}`}
-                tabIndex={-1}
-                className={`w-8 h-8 select-none cursor-pointer ${
-                  selectedTile?.x === x && selectedTile?.y === y
-                    ? "border-red-900 ring-2 ring-red-900"
-                    : "hover:border-red-900"
-                } hover:border-red-900
-                } ${tileColors[tile]} ${borderClasses}`}
-              />
-            );
-          })
-        )}
-        {selectedTile && (
-          <div className="fixed bottom-4 left-4 bg-white bg-opacity-90 text-black p-4 rounded shadow-lg z-50 w-64">
-            <p className="font-semibold">
-              Coordenadas:{" "}
-              <span className="font-normal">
-                {selectedTile.x} / {selectedTile.y}
-              </span>
-            </p>
-            <p className="font-semibold">
-              Tipo de Terreno:{" "}
-              <span className="font-normal capitalize">
-                {selectedTile.type}
-              </span>
-            </p>
-            <button
-              onClick={() => setSelectedTile(null)}
-              className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
-            >
-              Limpar Seleção
-            </button>
-          </div>
-        )}
+              return (
+                <div
+                  onClick={() => {
+                    setSelectedTile({ x, y, type: tile });
+                  }}
+                  key={`${y}-${x}`}
+                  tabIndex={-1}
+                  style={{
+                    width: `${tileSize}px`,
+                    height: `${tileSize}px`,
+                  }}
+                  className={`select-none cursor-pointer text-xs ${
+                    tileColors[tile]
+                  } ${borderClasses} ${
+                    selectedTile?.x === x && selectedTile?.y === y
+                      ? "border-red-900"
+                      : "hover:border-red-900"
+                  }`}
+                />
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );
