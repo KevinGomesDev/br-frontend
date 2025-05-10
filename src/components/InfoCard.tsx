@@ -4,7 +4,7 @@ type InfoCardProps = {
 };
 export default function InfoCard({ selectedTile, onClear }: InfoCardProps) {
   return (
-    <div className="bg-white p-4 rounded shadow-md w-full md:w-80">
+    <div className="bg-white p-4 rounded shadow-md w-full">
       <h2 className="text-lg font-bold mb-2">Informações do Terreno</h2>
       {selectedTile ? (
         <>

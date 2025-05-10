@@ -1,13 +1,8 @@
-export type Resources = {
-  minério: number;
-  arcana: number;
-  suprimento: number;
-  experiência: number;
-  devoção: number;
-  fortaleza: number;
-};
+import { useResources } from "../contexts/ResourceContext";
 
-export default function ResourceBar({ resources }: { resources: Resources }) {
+export default function ResourceBar() {
+  const { resources } = useResources();
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-6 text-sm">
       {Object.entries(resources).map(([key, value]) => (
