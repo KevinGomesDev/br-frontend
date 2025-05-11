@@ -8,6 +8,9 @@ import { RegentProvider } from "./contexts/RegentContext";
 import { ResourceProvider } from "./contexts/ResourceContext";
 import { FeedbackProvider } from "./contexts/AlertContext";
 import { MapProvider } from "./contexts/MapContext";
+import { GameProvider } from "./contexts/GameContext";
+import { PlayerProvider } from "./contexts/PlayerContext";
+import { TokenProvider } from "./contexts/TokenContext";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -17,7 +20,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <ResourceProvider>
             <FeedbackProvider>
               <MapProvider>
-                <App />
+                <GameProvider>
+                  <PlayerProvider>
+                    <TokenProvider>
+                      <App />
+                    </TokenProvider>
+                  </PlayerProvider>
+                </GameProvider>
               </MapProvider>
             </FeedbackProvider>
           </ResourceProvider>

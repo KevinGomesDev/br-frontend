@@ -36,7 +36,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       setUser(data);
     } catch (err) {
-      console.warn("Erro de conexão ao buscar /auth/me"); // opcional
+      console.warn("Erro de conexão ao buscar /auth/me");
       setUser(null);
     } finally {
       setLoading(false);

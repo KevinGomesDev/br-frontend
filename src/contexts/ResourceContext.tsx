@@ -6,12 +6,21 @@ export type Resources = {
   suprimento: number;
   experiência: number;
   devoção: number;
-  fortaleza: number;
+};
+
+export type ResourceProduction = {
+  minério: number;
+  arcana: number;
+  suprimento: number;
+  experiência: number;
+  devoção: number;
 };
 
 interface ResourceContextType {
   resources: Resources;
   setResources: React.Dispatch<React.SetStateAction<Resources>>;
+  production: ResourceProduction;
+  setProduction: React.Dispatch<React.SetStateAction<ResourceProduction>>;
   spendResource: (type: keyof Resources, amount: number) => boolean;
   gainResource: (type: keyof Resources, amount: number) => void;
 }
@@ -21,13 +30,20 @@ const ResourceContext = createContext<ResourceContextType | undefined>(
 );
 
 export function ResourceProvider({ children }: { children: React.ReactNode }) {
+  const [production, setProduction] = useState<ResourceProduction>({
+    minério: 0,
+    arcana: 0,
+    suprimento: 0,
+    experiência: 0,
+    devoção: 0,
+  });
+
   const [resources, setResources] = useState<Resources>({
-    minério: 50,
-    arcana: 50,
-    suprimento: 50,
-    experiência: 500,
-    devoção: 50,
-    fortaleza: 50,
+    minério: 20,
+    arcana: 20,
+    suprimento: 20,
+    experiência: 20,
+    devoção: 20,
   });
 
   const spendResource = (type: keyof Resources, amount: number) => {
@@ -44,7 +60,14 @@ export function ResourceProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ResourceContext.Provider
-      value={{ resources, setResources, spendResource, gainResource }}
+      value={{
+        resources,
+        setResources,
+        production,
+        setProduction,
+        spendResource,
+        gainResource,
+      }}
     >
       {children}
     </ResourceContext.Provider>

@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { useState } from "react";
-import MapGrid, { type TileType } from "../components/MapGrid";
+import MapGrid from "../components/MapGrid";
 import Feedback from "../components/Feedback";
 import InfoCard from "../components/InfoCard";
 import ResourceBar from "../components/ResourceBar";
 import RegenteView from "../components/RegentView";
 import { useFeedback } from "../contexts/AlertContext";
+import type { TileType } from "../contexts/MapContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();

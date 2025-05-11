@@ -11,8 +11,8 @@ export type TileType =
 interface MapContextType {
   map: TileType[][];
   offset: { x: number; y: number };
-  setOffset: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
   zoom: number;
+  setOffset: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
   setZoom: React.Dispatch<React.SetStateAction<number>>;
   tileSize: number;
 }
