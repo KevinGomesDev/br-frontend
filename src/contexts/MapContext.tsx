@@ -14,6 +14,7 @@ interface MapContextType {
   setOffset: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
   zoom: number;
   setZoom: React.Dispatch<React.SetStateAction<number>>;
+  tileSize: number;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -22,6 +23,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
   const [map, setMap] = useState<TileType[][]>([]);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const [tileSize, setTileSize] = useState(32);
 
   useEffect(() => {
     if (map.length === 0) {
@@ -30,8 +32,28 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     }
   }, [map]);
 
+  useEffect(() => {
+    const updateTileSize = () => {
+      const padding = 32;
+      const maxWidth = window.innerWidth - padding;
+      const maxHeight = window.innerHeight - padding;
+
+      const tileWidth = Math.floor(maxWidth / map[0]?.length || 0);
+      const tileHeight = Math.floor(maxHeight / map.length);
+      const newTileSize = Math.min(tileWidth, tileHeight);
+
+      setTileSize(newTileSize);
+    };
+
+    updateTileSize();
+    window.addEventListener("resize", updateTileSize);
+    return () => window.removeEventListener("resize", updateTileSize);
+  }, [map]);
+
   return (
-    <MapContext.Provider value={{ map, offset, setOffset, zoom, setZoom }}>
+    <MapContext.Provider
+      value={{ map, offset, setOffset, zoom, setZoom, tileSize }}
+    >
       {children}
     </MapContext.Provider>
   );

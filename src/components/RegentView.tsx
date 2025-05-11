@@ -1,17 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { CLASSES, type Class, type Skill } from "../data/classes";
 import { useRegent } from "../contexts/RegentContext";
 import { BASE_ATTRIBUTES } from "../data/attributes";
 import { useResources } from "../contexts/ResourceContext";
 import { useFeedback } from "../contexts/AlertContext";
-
-const baseAttributes = {
-  combat: 1,
-  accuracy: 1,
-  focus: 1,
-  armor: 1,
-  vitality: 1,
-};
+import { useRemainingPoints } from "../hooks/useRemainingPoints";
+import { xpToLevelUp } from "../utils/xp";
 
 export default function RegentView() {
   const {
@@ -22,21 +16,12 @@ export default function RegentView() {
     setAttributesFinalized,
   } = useRegent();
   const [formOpen, setFormOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const { spendResource } = useResources();
-  const { feedback, setFeedback } = useFeedback();
-
-  function handleSpendXp() {
-    if (spendResource("experiência", 1)) {
-      addXp(1);
-    } else {
-      setFeedback({
-        message: "Você não tem experiência suficiente!",
-        type: "error",
-      });
-    }
-  }
+  const { setFeedback } = useFeedback();
+  const [pendingFeatureLevels, setPendingFeatureLevels] = useState<number[]>(
+    []
+  );
 
   const [form, setForm] = useState({
     name: "",
@@ -46,32 +31,88 @@ export default function RegentView() {
     image: "",
     attributes: { ...BASE_ATTRIBUTES },
   });
+  const selectedClass = CLASSES.find((c) => c.name === form.class);
 
-  const { remainingPoints } = useMemo(() => {
-    const target = regent ?? form;
+  const targetLevel = pendingFeatureLevels[0] ?? (regent?.level || 1);
+  const allLearnedNames = regent?.features.map((f) => f.name) ?? [];
+  const canLearnNewSkill = pendingFeatureLevels.length > 0;
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    const total = 10 + target.level * 6;
-    const used = Object.values(target.attributes).reduce((a, b) => a + b, 0);
-    const remaining =
-      regent && attributesFinalized ? Math.max(0, total - used) : total - used;
+  const remainingPoints = useRemainingPoints(
+    regent?.level || form.level,
+    regent?.attributes || form.attributes,
+    attributesFinalized
+  );
 
-    return {
-      totalPoints: total,
-      usedPoints: used,
-      remainingPoints: remaining,
-    };
-  }, [regent, form, attributesFinalized]);
+  const xpBlocked =
+    canLearnNewSkill || remainingPoints > 0 || !attributesFinalized;
 
-  function xpToLevelUp(level: number) {
-    return 10 + (level - 1) * 10;
-  }
+  const availableClasses = useMemo(() => {
+    const remainingSkillsByClass = CLASSES.filter((c) =>
+      regent?.classes.includes(c.name)
+    ).map((cls) => ({
+      cls,
+      remaining: cls.skills.filter((s) => !allLearnedNames.includes(s.name)),
+    }));
 
-  const canChooseFeature = useMemo(() => {
-    const level = Number(form.level);
-    return level === 1 || level % 3 === 0;
-  }, [form.level]);
+    if (remainingSkillsByClass.some((r) => r.remaining.length > 0)) {
+      return remainingSkillsByClass
+        .filter((r) => r.remaining.length > 0)
+        .map((r) => r.cls);
+    }
 
-  function updateAttribute(attr: keyof typeof baseAttributes, delta: number) {
+    return CLASSES.filter((c) => !regent?.classes.includes(c.name));
+  }, [regent?.classes, allLearnedNames]);
+
+  useEffect(() => {
+    if (!regent) return;
+    const alreadyLearnedLevels = regent.features.map((f) => f.level);
+    const newLevels: number[] = [];
+
+    for (let lvl = 3; lvl <= regent.level; lvl += 3) {
+      if (!alreadyLearnedLevels.includes(lvl)) {
+        newLevels.push(lvl);
+      }
+    }
+
+    setPendingFeatureLevels(newLevels);
+  }, [regent?.level]);
+
+  useEffect(() => {
+    if (!regent || !canLearnNewSkill || !targetLevel) return;
+
+    const allKnownClasses = CLASSES.filter((cls) =>
+      regent.classes.includes(cls.name)
+    );
+
+    const availableSkills = allKnownClasses
+      .flatMap((cls) => cls.skills.map((s) => ({ ...s, className: cls.name })))
+      .filter((skill) => !allLearnedNames.includes(skill.name));
+
+    if (availableSkills.length === 1) {
+      const skill = availableSkills[0];
+      setRegent((prev) =>
+        prev
+          ? {
+              ...prev,
+              classes: prev.classes.includes(skill.className)
+                ? prev.classes
+                : [...prev.classes, skill.className],
+              features: [
+                ...prev.features,
+                { name: skill.name, level: targetLevel },
+              ],
+            }
+          : prev
+      );
+      setPendingFeatureLevels((prev) =>
+        prev.filter((lvl) => lvl !== targetLevel)
+      );
+      return;
+    }
+  }, [canLearnNewSkill, regent, targetLevel, allLearnedNames]);
+
+  function updateAttribute(attr: keyof typeof BASE_ATTRIBUTES, delta: number) {
     setForm((prev) => {
       const newVal = prev.attributes[attr] + delta;
       if (newVal < 1 || remainingPoints - delta < 0) return prev;
@@ -85,14 +126,31 @@ export default function RegentView() {
     });
   }
 
+  function handleSpendXp() {
+    if (xpBlocked) return;
+    if (spendResource("experiência", 1)) {
+      addXp(1);
+    } else {
+      setFeedback({
+        message: "Você não tem experiência suficiente!",
+        type: "error",
+      });
+    }
+  }
+
   function createRegent() {
     setRegent({
-      ...form,
+      name: form.name,
+      classes: form.class ? [form.class] : [],
+      description: form.description,
+      image: form.image,
+      level: form.level,
+      attributes: { ...form.attributes },
+      baseAttributes: { ...form.attributes },
+      xp: 0,
       features: selectedSkill
         ? [{ name: selectedSkill.name, level: form.level }]
         : [],
-      xp: 0,
-      baseAttributes: { ...form.attributes },
     });
     setFormOpen(false);
     if (remainingPoints === 0) {
@@ -115,7 +173,7 @@ export default function RegentView() {
 
   if (formOpen) {
     return (
-      <div className="bg-white rounded shadow-md w-full h-[calc(100vh-14rem)] overflow-hidden relative touch-none">
+      <div className="bg-white rounded shadow-md w-full relative touch-none p-4 space-y-4">
         <h2 className="text-xl font-semibold">Create Regent</h2>
 
         <input
@@ -127,16 +185,16 @@ export default function RegentView() {
         />
 
         <select
+          className="border p-2 cursor-pointer"
           onChange={(e) => {
             const clsName = e.target.value;
             const cls = CLASSES.find(
               (c) => c.name.toLowerCase() === clsName.toLowerCase()
             );
-            setSelectedClass(cls ?? null);
             setSelectedSkill(null);
             setForm({ ...form, class: e.target.value });
           }}
-          value={selectedClass?.name || ""}
+          value={form.class}
         >
           <option value="">Select a Class</option>
           {CLASSES.map((cls) => (
@@ -146,7 +204,7 @@ export default function RegentView() {
           ))}
         </select>
 
-        {selectedClass && canChooseFeature && (
+        {selectedClass && (
           <div className="space-y-2">
             <p className="font-semibold">Choose a Feature:</p>
             {selectedClass.skills.map((skill: Skill) => (
@@ -202,7 +260,7 @@ export default function RegentView() {
                 <button
                   className="bg-gray-300 px-2 rounded"
                   onClick={() =>
-                    updateAttribute(key as keyof typeof baseAttributes, -1)
+                    updateAttribute(key as keyof typeof BASE_ATTRIBUTES, -1)
                   }
                 >
                   -
@@ -211,7 +269,7 @@ export default function RegentView() {
                 <button
                   className="bg-gray-300 px-2 rounded"
                   onClick={() =>
-                    updateAttribute(key as keyof typeof baseAttributes, 1)
+                    updateAttribute(key as keyof typeof BASE_ATTRIBUTES, 1)
                   }
                 >
                   +
@@ -232,7 +290,7 @@ export default function RegentView() {
   }
 
   function updateAttributePostCreation(
-    attr: keyof typeof baseAttributes,
+    attr: keyof typeof BASE_ATTRIBUTES,
     delta: number
   ) {
     setRegent((prev) => {
@@ -242,8 +300,8 @@ export default function RegentView() {
       const base = prev.baseAttributes[attr];
       const newVal = current + delta;
 
-      if (delta > 0 && remainingPoints <= 0) return prev;
-      if (delta < 0 && newVal < base) return prev;
+      if ((delta > 0 && remainingPoints <= 0) || (delta < 0 && newVal < base))
+        return prev;
 
       return {
         ...prev,
@@ -255,10 +313,51 @@ export default function RegentView() {
     });
   }
 
+  function startHoldingXp() {
+    if (xpBlocked) return;
+    if (intervalRef.current !== null) return;
+
+    let speed = 100;
+    let pressCount = 0;
+
+    const tick = () => {
+      if (canLearnNewSkill || remainingPoints > 0) {
+        stopHoldingXp();
+        return;
+      }
+
+      pressCount++;
+      if (spendResource("experiência", 1)) {
+        addXp(1);
+      } else {
+        setFeedback({
+          message: "Você não tem experiência suficiente!",
+          type: "error",
+        });
+        stopHoldingXp();
+      }
+
+      if (pressCount % 5 === 0 && speed > 100) {
+        speed = Math.max(100, speed - 100);
+        clearInterval(intervalRef.current!);
+        intervalRef.current = window.setInterval(tick, speed);
+      }
+    };
+
+    intervalRef.current = window.setInterval(tick, speed);
+  }
+
+  function stopHoldingXp() {
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }
+
   return (
-    <div className="bg-white rounded shadow-md w-full h-[calc(100vh-14rem)]  relative touch-none p-4 space-y-4">
+    <div className="bg-white rounded shadow-md w-full relative touch-none p-4 space-y-4">
       <h2 className="text-xl font-semibold">Regent: {regent?.name}</h2>
-      <p className="italic">Class: {regent?.class}</p>
+      <p className="italic">Classes: {regent?.classes.join(", ")}</p>
       <p>{regent?.description}</p>
       {regent?.image && (
         <img
@@ -285,13 +384,15 @@ export default function RegentView() {
                 {!attributesFinalized &&
                 (remainingPoints > 0 ||
                   v >
-                    regent.baseAttributes[k as keyof typeof baseAttributes]) ? (
+                    regent.baseAttributes[
+                      k as keyof typeof BASE_ATTRIBUTES
+                    ]) ? (
                   <>
                     <button
                       className="ml-2 px-2 bg-gray-300 rounded"
                       onClick={() =>
                         updateAttributePostCreation(
-                          k as keyof typeof baseAttributes,
+                          k as keyof typeof BASE_ATTRIBUTES,
                           -1
                         )
                       }
@@ -302,7 +403,7 @@ export default function RegentView() {
                       className="px-2 bg-gray-300 rounded"
                       onClick={() =>
                         updateAttributePostCreation(
-                          k as keyof typeof baseAttributes,
+                          k as keyof typeof BASE_ATTRIBUTES,
                           1
                         )
                       }
@@ -349,13 +450,33 @@ export default function RegentView() {
         {regent && regent.features.length > 0 && (
           <>
             <p className="font-semibold mt-4">Features:</p>
-            <ul className="ml-4 list-disc">
-              {regent.features.map((f) => (
-                <li key={f.name}>
-                  {f.name} (Level {f.level})
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-2">
+              {regent.features.map((f) => {
+                const allKnownSkills = CLASSES.filter((c) =>
+                  regent.classes.includes(c.name)
+                ).flatMap((c) => c.skills);
+
+                const feature = allKnownSkills.find((s) => s.name === f.name);
+
+                if (!feature) return null;
+
+                return (
+                  <div
+                    key={feature.name}
+                    className="border p-3 rounded bg-gray-50 shadow-sm"
+                  >
+                    <p className="font-bold text-lg">{feature.name}</p>
+                    <p className="text-sm italic text-gray-600 mb-1">
+                      {feature.type} | Cost: {feature.cost}
+                    </p>
+                    <p className="text-sm">{feature.description}</p>
+                    <p className="text-xs mt-2 text-gray-500">
+                      Desbloqueada no nível {f.level}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
 
             <div className="mt-4">
               <p className="font-semibold">
@@ -372,12 +493,71 @@ export default function RegentView() {
             </div>
 
             <button
-              className="mt-2 bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+              disabled={xpBlocked}
+              onMouseDown={startHoldingXp}
+              onMouseUp={stopHoldingXp}
+              onMouseLeave={stopHoldingXp}
+              onTouchStart={startHoldingXp}
+              onTouchEnd={stopHoldingXp}
               onClick={handleSpendXp}
+              className={`mt-2 px-3 py-1 rounded text-white ${
+                xpBlocked
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-purple-600 hover:bg-purple-700"
+              }`}
             >
-              Spend Experience (+1 XP)
+              Spend Experience
             </button>
           </>
+        )}
+        {canLearnNewSkill && (
+          <div className="mt-6 space-y-2">
+            <p className="font-semibold text-lg">
+              Escolha uma nova habilidade:
+            </p>
+
+            {availableClasses.map((cls) => (
+              <div key={cls.name}>
+                <p className="font-bold text-blue-600">{cls.name}</p>
+                <div className="space-y-2">
+                  {cls.skills
+                    .filter((skill) => !allLearnedNames.includes(skill.name))
+                    .map((skill) => (
+                      <div
+                        key={skill.name}
+                        className="border p-3 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => {
+                          setRegent((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  classes: prev.classes.includes(cls.name)
+                                    ? prev.classes
+                                    : [...prev.classes, cls.name],
+                                  features: [
+                                    ...prev.features,
+                                    { name: skill.name, level: targetLevel! },
+                                  ],
+                                }
+                              : prev
+                          );
+
+                          setPendingFeatureLevels((prev) =>
+                            prev.filter((lvl) => lvl !== targetLevel)
+                          );
+                        }}
+                      >
+                        <p className="font-bold">{skill.name}</p>
+                        <p className="text-sm italic text-gray-600">
+                          {skill.type} | Cost: {skill.cost}
+                        </p>
+                        <p className="text-sm">{skill.description}</p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

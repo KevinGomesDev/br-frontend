@@ -10,30 +10,11 @@ export default function MapGrid({
     tile: { x: number; y: number; type: TileType } | null
   ) => void;
 }) {
-  const { map, offset, setOffset, zoom, setZoom } = useMap();
+  const { map, offset, setOffset, zoom, setZoom, tileSize } = useMap();
   const rows = map.length;
   const cols = map[0]?.length || 0;
 
-  const [tileSize, setTileSize] = useState(32);
   const containerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const updateTileSize = () => {
-      const padding = 32;
-      const maxWidth = window.innerWidth - padding;
-      const maxHeight = window.innerHeight - padding;
-
-      const tileWidth = Math.floor(maxWidth / cols);
-      const tileHeight = Math.floor(maxHeight / rows);
-      const newTileSize = Math.min(tileWidth, tileHeight);
-
-      setTileSize(newTileSize);
-    };
-
-    updateTileSize();
-    window.addEventListener("resize", updateTileSize);
-    return () => window.removeEventListener("resize", updateTileSize);
-  }, [cols, rows]);
 
   const tileColors: Record<TileType, string> = {
     grass: "border bg-green-600 border-green-500",

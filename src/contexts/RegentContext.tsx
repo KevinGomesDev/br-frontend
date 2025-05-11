@@ -6,7 +6,7 @@ export type Attributes = Record<AttributeKey, number>;
 
 export interface Regent {
   name: string;
-  class: string;
+  classes: string[];
   description: string;
   image: string;
   attributes: Attributes;
@@ -29,7 +29,6 @@ const RegentContext = createContext<RegentContextType | undefined>(undefined);
 export function RegentProvider({ children }: { children: React.ReactNode }) {
   const [regent, setRegent] = useState<Regent | null>(null);
   const [attributesFinalized, setAttributesFinalized] = useState(false);
-
   const addXp = (amount: number) => {
     setRegent((prev) => {
       if (!prev) return prev;

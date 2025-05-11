@@ -22,12 +22,12 @@ const ResourceContext = createContext<ResourceContextType | undefined>(
 
 export function ResourceProvider({ children }: { children: React.ReactNode }) {
   const [resources, setResources] = useState<Resources>({
-    minério: 0,
-    arcana: 0,
-    suprimento: 0,
-    experiência: 0,
-    devoção: 0,
-    fortaleza: 0,
+    minério: 50,
+    arcana: 50,
+    suprimento: 50,
+    experiência: 500,
+    devoção: 50,
+    fortaleza: 50,
   });
 
   const spendResource = (type: keyof Resources, amount: number) => {
