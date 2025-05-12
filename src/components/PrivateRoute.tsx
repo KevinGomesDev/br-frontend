@@ -26,7 +26,7 @@ export default function PrivateRoute({ children }: Props) {
   }, []);
 
   if (isAuth === null) {
-    return <p className="text-center mt-10">Verificando sessão...</p>;
+    return <p className="text-center mt-10 text-text">Verificando sessão...</p>;
   }
 
   if (!isAuth) {

@@ -4,33 +4,40 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 import { UserProvider } from "./contexts/UserContext";
-import { RegentProvider } from "./contexts/RegentContext";
 import { ResourceProvider } from "./contexts/ResourceContext";
 import { FeedbackProvider } from "./contexts/AlertContext";
 import { MapProvider } from "./contexts/MapContext";
 import { GameProvider } from "./contexts/GameContext";
 import { PlayerProvider } from "./contexts/PlayerContext";
 import { TokenProvider } from "./contexts/TokenContext";
+import { BattleProvider } from "./contexts/BattleContext";
+import { UnitProvider } from "./contexts/UnitContext";
+import { ArmyProvider } from "./contexts/ArmyContext";
+import "./styles/theme.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <UserProvider>
-        <RegentProvider>
+        <FeedbackProvider>
           <ResourceProvider>
-            <FeedbackProvider>
-              <MapProvider>
-                <GameProvider>
-                  <PlayerProvider>
-                    <TokenProvider>
-                      <App />
-                    </TokenProvider>
-                  </PlayerProvider>
-                </GameProvider>
-              </MapProvider>
-            </FeedbackProvider>
+            <BattleProvider>
+              <ArmyProvider>
+                <UnitProvider>
+                  <MapProvider>
+                    <GameProvider>
+                      <PlayerProvider>
+                        <TokenProvider>
+                          <App />
+                        </TokenProvider>
+                      </PlayerProvider>
+                    </GameProvider>
+                  </MapProvider>
+                </UnitProvider>
+              </ArmyProvider>
+            </BattleProvider>
           </ResourceProvider>
-        </RegentProvider>
+        </FeedbackProvider>
       </UserProvider>
     </BrowserRouter>
   </React.StrictMode>

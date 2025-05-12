@@ -108,13 +108,11 @@ export function MapToken({
     });
   }
 
-  console.log();
-
   return (
     <div
       className={`absolute z-20 ${
         movable ? "cursor-pointer" : "cursor-default"
-      } border`}
+      } border border-[var(--token-border)] bg-[var(--token-bg)]`}
       style={{
         left: posX,
         top: posY,

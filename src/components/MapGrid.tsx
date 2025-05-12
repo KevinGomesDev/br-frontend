@@ -171,12 +171,13 @@ export default function MapGrid({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const tileColors: Record<TileType, string> = {
-    grass: "border bg-green-600 border-green-500",
-    water: "border bg-blue-600 border-blue-500",
-    forest: "border bg-emerald-900 border-emerald-800",
-    snow: "border bg-gray-200 border-gray-100",
-    desert: "border bg-yellow-400 border-gray-100",
-    frozen_water: "border bg-cyan-200 border-cyan-100",
+    grass: "border bg-[var(--tile-grass)] border-[var(--tile-grass-border)]",
+    water: " bg-[var(--tile-water)] ",
+    forest: "border bg-[var(--tile-forest)] border-[var(--tile-forest-border)]",
+    snow: "border bg-[var(--tile-snow)] border-[var(--tile-snow-border)]",
+    desert: "border bg-[var(--tile-desert)] border-[var(--tile-desert-border)]",
+    frozen_water:
+      "border bg-[var(--tile-frozen-water)] border-[var(--tile-frozen-water-border)]",
   };
 
   useEffect(() => {
@@ -287,7 +288,7 @@ export default function MapGrid({
   return (
     <div
       ref={containerRef}
-      className="bg-white rounded shadow-md w-full h-[calc(100vh-14rem)] overflow-hidden relative touch-none"
+      className="bg-bg text-text rounded shadow-md w-full h-[calc(100vh-14rem)] overflow-hidden relative touch-none"
       onWheel={handleZoom}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -297,8 +298,6 @@ export default function MapGrid({
       onTouchMove={handleTouchMove}
       onTouchEnd={() => setIsDragging(false)}
     >
-      {/* Wrapper que aplica o zoom e offset */}
-
       <div
         style={{
           transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
@@ -310,7 +309,6 @@ export default function MapGrid({
           height: `${rows * tileSize}px`,
         }}
       >
-        {/* Camada de Tokens acima do Grid */}
         <TokenLayer width={cols * tileSize} height={rows * tileSize}>
           <TerritoryOverlay
             playerColors={playerColors}
@@ -367,7 +365,7 @@ export default function MapGrid({
                 const effectiveCost =
                   Math.floor((outside + credit) / 3) + Math.floor(inside / 6);
 
-                const newCredit = ((outside + credit) % 3) + (inside % 6); // credit acumulado para ambos
+                const newCredit = ((outside + credit) % 3) + (inside % 6);
 
                 const canMove =
                   isAreaFree(newX, newY, token.size, tokens, token.id) &&
@@ -395,8 +393,6 @@ export default function MapGrid({
           ))}
         </TokenLayer>
 
-        {/* Grid de Tiles */}
-
         <div
           className="grid"
           style={{
@@ -414,13 +410,17 @@ export default function MapGrid({
                     : "water";
 
                 if (getTile(y - 1, x) !== "water")
-                  borderClasses += " border-t border-blue-800";
+                  borderClasses +=
+                    " border-t border-[var(--tile-water-border-deep)]";
                 if (getTile(y + 1, x) !== "water")
-                  borderClasses += " border-b border-blue-800";
+                  borderClasses +=
+                    " border-b border-[var(--tile-water-border-deep)]";
                 if (getTile(y, x - 1) !== "water")
-                  borderClasses += " border-l border-blue-800";
+                  borderClasses +=
+                    " border-l border-[var(--tile-water-border-deep)]";
                 if (getTile(y, x + 1) !== "water")
-                  borderClasses += " border-r border-blue-800";
+                  borderClasses +=
+                    " border-r border-[var(--tile-water-border-deep)]";
               }
 
               return (
@@ -438,8 +438,8 @@ export default function MapGrid({
                     tileColors[tile]
                   } ${borderClasses} ${
                     selectedTile?.x === x && selectedTile?.y === y
-                      ? "border-red-900"
-                      : "hover:border-red-900"
+                      ? "border-[var(--tile-selected)]"
+                      : "hover:border-[var(--tile-selected)]"
                   }`}
                 />
               );

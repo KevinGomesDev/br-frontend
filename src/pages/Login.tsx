@@ -57,7 +57,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-bg px-4">
       {feedback && (
         <Feedback
           message={feedback.message}
@@ -67,23 +67,23 @@ function Login() {
       )}
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-full max-w-sm"
+        className="bg-card text-text p-8 rounded shadow-md w-full max-w-sm"
       >
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">
+        <h1 className="text-2xl font-bold mb-6 text-center text-[var(--text-highlight)]">
           Login
         </h1>
 
         <div className="mb-4">
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-text mb-1"
           >
             Email
           </label>
           <input
             id="email"
             type="email"
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full border border-[var(--input-border)] bg-[var(--input-bg)] text-text rounded px-3 py-2 focus:outline-none focus:ring focus:ring-[var(--text-highlight)]"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -93,14 +93,14 @@ function Login() {
         <div className="mb-6">
           <label
             htmlFor="senha"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-text mb-1"
           >
             Senha
           </label>
           <input
             id="senha"
             type="password"
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full border border-[var(--input-border)] bg-[var(--input-bg)] text-text rounded px-3 py-2 focus:outline-none focus:ring focus:ring-[var(--input-ring)]"
             value={password}
             onChange={(e) => setSenha(e.target.value)}
             required
@@ -109,13 +109,16 @@ function Login() {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+          className="w-full bg-[var(--button-primary)] text-[var(--button-primary-text)] py-2 px-4 rounded hover:bg-[var(--button-primary-hover)] transition"
         >
           Entrar
         </button>
         <p className="mt-4 text-sm text-center">
           Não tem conta?{" "}
-          <Link to="/register" className="text-blue-600 hover:underline">
+          <Link
+            to="/register"
+            className="text-[var(--text-highlight)] hover:underline"
+          >
             Crie uma agora
           </Link>
         </p>

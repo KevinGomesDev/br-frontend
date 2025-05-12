@@ -62,7 +62,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-bg">
       {feedback && (
         <Feedback
           message={feedback.message}
@@ -72,16 +72,16 @@ export default function Register() {
       )}
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-full max-w-sm"
+        className="bg-card text-text p-8 rounded shadow-md w-full max-w-sm"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
+        <h2 className="text-2xl font-bold mb-6 text-center text-[var(--text-highlight)]">
           Criar Conta
         </h2>
 
         <label className="block mb-2">
           Nome
           <input
-            className="mt-1 w-full px-3 py-2 border rounded"
+            className="mt-1 w-full px-3 py-2 border border-[var(--input-border)] bg-[var(--input-bg)] text-text rounded"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -92,7 +92,7 @@ export default function Register() {
         <label className="block mb-2">
           Email
           <input
-            className="mt-1 w-full px-3 py-2 border rounded"
+            className="mt-1 w-full px-3 py-2 border border-[var(--input-border)] bg-[var(--input-bg)] text-text rounded"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -103,7 +103,7 @@ export default function Register() {
         <label className="block mb-4">
           Senha
           <input
-            className="mt-1 w-full px-3 py-2 border rounded"
+            className="mt-1 w-full px-3 py-2 border border-[var(--input-border)] bg-[var(--input-bg)] text-text rounded"
             type="password"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
@@ -113,13 +113,13 @@ export default function Register() {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          className="w-full bg-[var(--button-primary)] text-[var(--button-primary-text)] py-2 rounded hover:bg-[var(--button-primary-hover)] transition"
         >
           Registrar
         </button>
         <p className="mt-4 text-sm text-center">
           Já tem conta?{" "}
-          <Link to="/" className="text-blue-600 hover:underline">
+          <Link to="/" className="text-[var(--text-highlight)] hover:underline">
             Entre agora
           </Link>
         </p>

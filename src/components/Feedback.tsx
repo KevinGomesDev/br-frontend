@@ -18,11 +18,14 @@ export default function Feedback({
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bg = type === "success" ? "bg-green-600" : "bg-red-600";
+  const bg =
+    type === "success"
+      ? "bg-[var(--resource-positive)]"
+      : "bg-[var(--button-danger)]";
 
   return (
     <div
-      className={`fixed top-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded text-white shadow-lg z-50 ${bg}`}
+      className={`fixed top-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded text-[var(--button-primary-text)] shadow-lg z-50 ${bg}`}
     >
       {message}
     </div>

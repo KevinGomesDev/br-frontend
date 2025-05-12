@@ -5,7 +5,7 @@ import MapGrid from "../components/MapGrid";
 import Feedback from "../components/Feedback";
 import InfoCard from "../components/InfoCard";
 import ResourceBar from "../components/ResourceBar";
-import RegenteView from "../components/RegentView";
+import RegenteView from "../components/units/regent/RegentView";
 import { useFeedback } from "../contexts/AlertContext";
 import type { TileType } from "../contexts/MapContext";
 
@@ -42,7 +42,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="font-base min-h-screen bg-bg text-text p-6">
       {feedback && (
         <Feedback
           message={feedback.message}
@@ -69,8 +69,8 @@ export default function Dashboard() {
               onClick={() => setSelectedTab(tab as typeof selectedTab)}
               className={`px-4 py-2 rounded-t text-sm sm:text-base flex-1 text-center ${
                 selectedTab === tab
-                  ? "bg-white text-blue-600 font-semibold border border-b-0"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  ? "bg-card text-[var(--text-highlight)] font-semibold border border-b-0"
+                  : "bg-[var(--tab-bg)] text-[var(--tab-text)] hover:bg-[var(--tab-hover)]"
               }`}
             >
               {tab}
@@ -91,23 +91,29 @@ export default function Dashboard() {
           )}
 
           {selectedTab === "Reino" && (
-            <p className="text-gray-600">Seção do Reino em construção.</p>
+            <p className="text-[var(--subtle-text)]">
+              Seção do Reino em construção.
+            </p>
           )}
           {selectedTab === "Regente" && <RegenteView />}
           {selectedTab === "Heróis" && (
-            <p className="text-gray-600">Seção dos Heróis em construção.</p>
+            <p className="text-[var(--subtle-text)]">
+              Seção dos Heróis em construção.
+            </p>
           )}
           {selectedTab === "Tropas" && (
-            <p className="text-gray-600">Seção das Tropas em construção.</p>
+            <p className="text-[var(--subtle-text)]">
+              Seção das Tropas em construção.
+            </p>
           )}
           {selectedTab === "Configurações" && (
             <div className="space-y-4">
-              <p className="text-gray-600">
+              <p className="text-[var(--subtle-text)]">
                 Configurações da conta e preferências.
               </p>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+                className="bg-[var(--button-danger)] text-[var(--button-danger-text)] px-4 py-2 rounded hover:bg-[var(--button-danger-hover)] transition"
               >
                 Sair
               </button>

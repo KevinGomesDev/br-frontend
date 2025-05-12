@@ -1,0 +1,85 @@
+:root {
+  --font-base: "Underdog", system-ui;
+  --font-weight-base: 400;
+  --font-style-base: normal;
+
+  /* Cores base */
+  --color-bg: #111111;
+  --color-text: #f9f9f9;
+  --color-card: #1e1e1e;
+  --color-primary: #6366f1;
+
+  /* Tiles */
+  --tile-grass: #388e3c;
+  --tile-grass-border: #2e7d32;
+
+  --tile-water: #1565c0;
+  --tile-water-border: #0d47a1;
+  --tile-water-border-deep: #08306b;
+
+  --tile-forest: #1b5e20;
+  --tile-forest-border: #0d3c12;
+
+  --tile-snow: #cfd8dc;
+  --tile-snow-border: #90a4ae;
+
+  --tile-desert: #f9a825;
+  --tile-desert-border: #f57f17;
+
+  --tile-frozen-water: #80deea;
+  --tile-frozen-water-border: #4dd0e1;
+
+  --tile-selected: #f87171;
+
+  /* Tokens */
+  --token-border: #888888;
+  --token-bg: transparent;
+
+  /* Texto */
+  --text-highlight: #3b82f6;
+  --text-link: var(--text-highlight);
+  --subtle-text: #9ca3af;
+  --muted-text: #6b7280;
+
+  /* Inputs */
+  --input-border: #444444;
+  --input-bg: #1f1f1f;
+  --input-bg-soft: #2a2a2a;
+  --input-bg-hover: #3a3a3a;
+  --input-ring: var(--text-highlight);
+
+  /* Tabs */
+  --tab-bg: #2a2a2a;
+  --tab-text: #d1d5db;
+  --tab-hover: #3a3a3a;
+
+  /* Botões */
+  --button-primary: #2563eb;
+  --button-primary-hover: #1d4ed8;
+  --button-primary-text: #ffffff;
+
+  --button-secondary: #4b5563;
+  --button-secondary-text: #f3f4f6;
+
+  --button-confirm: #16a34a;
+  --button-confirm-hover: #15803d;
+  --button-confirm-text: #ffffff;
+
+  --button-danger: #dc2626;
+  --button-danger-hover: #b91c1c;
+  --button-danger-text: #ffffff;
+
+  --button-xp: #9333ea;
+  --button-xp-hover: #7e22ce;
+  --button-xp-disabled: #9ca3af;
+  --button-xp-text: #ffffff;
+
+  --button-disabled: #9ca3af;
+
+  /* Experiência */
+  --xp-bar-bg: #3f3f46;
+  --xp-bar-fill: #a855f7;
+
+  /* Recursos */
+  --resource-positive: #22c55e;
+}

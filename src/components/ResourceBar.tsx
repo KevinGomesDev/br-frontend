@@ -8,7 +8,7 @@ export default function ResourceBar() {
       {Object.entries(resources).map(([key, value]) => (
         <div
           key={key}
-          className="flex items-center gap-2 bg-white shadow rounded p-2"
+          className="flex items-center gap-2 bg-card text-text shadow rounded p-2"
         >
           <img
             src={`/icons/${key}.jpg`}
@@ -16,9 +16,9 @@ export default function ResourceBar() {
             className="w-6 h-6 object-contain"
           />
           <div>
-            <p className="capitalize font-semibold text-gray-700">{key}</p>
-            <p className="text-gray-900">{value}</p>
-            <p className="text-xs text-green-600">
+            <p className="capitalize font-semibold text-text">{key}</p>
+            <p className="text-text">{value}</p>
+            <p className="text-xs text-[var(--resource-positive)]">
               +{production[key as keyof typeof production]}/turno
             </p>
           </div>

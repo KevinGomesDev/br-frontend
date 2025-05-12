@@ -1,7 +1,7 @@
 export const BASE_ATTRIBUTES = {
-  combat: 1,
-  accuracy: 1,
-  focus: 1,
-  armor: 1,
-  vitality: 1,
+  combat: 10,
+  accuracy: 10,
+  focus: 10,
+  armor: 10,
+  vitality: 10,
 };

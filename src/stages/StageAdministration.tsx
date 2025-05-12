@@ -162,18 +162,20 @@ export default function StageAdministration({
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold">Administração</h3>
-      <p className="text-gray-600">
+      <p className="text-[var(--subtle-text)]">
         Escolha onde construir e gerencie seus recursos.
       </p>
 
       <div className="mb-4">
         <label className="block font-bold mb-2">Tile Selecionado:</label>
         {selectedTile ? (
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-text">
             ({selectedTile.x}, {selectedTile.y}) - {selectedTile.type}
           </p>
         ) : (
-          <p className="italic text-gray-500">Nenhum tile selecionado.</p>
+          <p className="italic text-[var(--muted-text)]">
+            Nenhum tile selecionado.
+          </p>
         )}
       </div>
 
@@ -190,8 +192,8 @@ export default function StageAdministration({
                 key={type}
                 className={`px-3 py-1 rounded ${
                   selectedType === type
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-200"
+                    ? "bg-[var(--button-confirm)] text-[var(--button-confirm-text)]"
+                    : "bg-[var(--button-secondary)] text-[var(--button-secondary-text)]"
                 }`}
                 onClick={() => setSelectedType(type)}
               >
@@ -203,17 +205,17 @@ export default function StageAdministration({
           <button
             onClick={handleBuild}
             disabled={!selectedType}
-            className={`px-4 py-2 rounded text-white ${
+            className={`px-4 py-2 rounded text-[var(--button-confirm-text)] ${
               selectedType
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-gray-400 cursor-not-allowed"
+                ? "bg-[var(--button-confirm)] hover:bg-[var(--button-confirm-hover)]"
+                : "bg-[var(--button-disabled)] cursor-not-allowed"
             }`}
           >
             Construir
           </button>
 
           {builtThisTurn > 0 && (
-            <p className="mt-2 text-green-600">
+            <p className="mt-2 text-[var(--resource-positive)]">
               {builtThisTurn} construção{builtThisTurn > 1 ? "s" : ""}{" "}
               realizadas.
             </p>
