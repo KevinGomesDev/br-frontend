@@ -61,7 +61,10 @@ export default function RegentCreateForm({ onClose }: Props) {
         : [],
       conditions: [],
       spells: [],
+      currentHp: form.attributes.vitality,
       actionMarks: 0,
+      x: 0,
+      y: 0,
     };
 
     setSelectedUnit(newRegent);

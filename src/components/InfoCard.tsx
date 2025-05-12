@@ -2,7 +2,6 @@ import { useGame } from "../contexts/GameContext";
 import { useUser } from "../contexts/UserContext";
 import StageAdministration from "../stages/StageAdministration";
 import { useBattle } from "../contexts/BattleContext";
-import { useArmy } from "../contexts/ArmyContext";
 import { BASE_ATTRIBUTES } from "../data/attributes";
 import type { RegentUnit } from "../contexts/UnitContext";
 
