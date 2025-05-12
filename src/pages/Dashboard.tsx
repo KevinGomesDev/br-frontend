@@ -11,7 +11,7 @@ import type { TileType } from "../contexts/MapContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { setUser } = useUser();
   const { feedback, setFeedback } = useFeedback();
 
   const [selectedTab, setSelectedTab] = useState<

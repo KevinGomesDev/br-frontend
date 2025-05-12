@@ -163,7 +163,7 @@ export default function MapGrid({
   const { map, offset, setOffset, zoom, setZoom, tileSize } = useMap();
   const rows = map.length;
   const cols = map[0]?.length || 0;
-  const { feedback, setFeedback } = useFeedback();
+  const { setFeedback } = useFeedback();
   const { tokens, setTokens, addToken } = useTokens();
   const [isTokenDragging, setIsTokenDragging] = useState(false);
   const { spendResource } = useResources();
